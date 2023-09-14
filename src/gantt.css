@@ -1,0 +1,24 @@
+.gantt .headerBackground {
+  fill: #ffffff;
+}
+
+.gantt .bodyRow {
+  fill: #f5f5f5
+}
+
+.gantt .bodyRow:nth-child(even) {
+  fill: #ffffff;
+}
+
+.gantt .row-line {
+  stroke: #ebeff2;
+}
+
+.gantt .bar {
+  fill: #1677ff;
+}
+
+.gantt .barText {
+  dominant-baseline: central;
+  fill: #555;
+}
