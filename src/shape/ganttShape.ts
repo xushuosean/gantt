@@ -1,5 +1,6 @@
 import { createSVG } from "../utils";
 import GanttSvgCanvas from "../utils/GanttSvgCanvas";
+import { GanttCellState } from "../view/GanttCellState";
 
 export default class ganttShape {
   constructor() {
@@ -37,12 +38,16 @@ export default class ganttShape {
   }
 
   doRedrawShape(canvas: GanttSvgCanvas, x: number, y: number, w: number, h: number) {
-    canvas.rect(x, y, w, h);
+    canvas.rect(x, y, w, h, 4, 4, 20);
     canvas.end()
   }
 
   createCanvas() {
     return new GanttSvgCanvas(this.node);
+  }
+
+  apply(state: GanttCellState) {
+    this.state = state;
   }
 
   destroy() {
@@ -53,4 +58,6 @@ export default class ganttShape {
   bounds: any;
   strokewidth: number;
   opacity: number;
+
+  state: GanttCellState;
 }

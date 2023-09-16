@@ -13,7 +13,7 @@ type GanttCellData = {
   height: number;
 }
 
-export class GanttTasks {
+export class CodeToGantt {
   ganttStart: Dayjs;
   ganttEnd: Dayjs;
 

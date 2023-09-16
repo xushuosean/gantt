@@ -135,7 +135,7 @@ export class TableView extends GanttEventSource {
   }
 
   private getTableHeight() {
-    return this.headerHeight + this.rowHeight * this.columnNum
+    return this.headerHeight + this.rowHeight * this.gantt.tasks.length
   }
 
   private getRenderColumnWidth() {

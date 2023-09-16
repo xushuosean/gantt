@@ -1,13 +1,15 @@
 import { GanttCellState } from "./GanttCellState";
-import GanttShape from '../shape/ganttShape';
+import ganttShape from "../shape/ganttShape";
 export default class GanttBarRenderer {
-    defaultConfigShapes: {};
-    defaultShape: any;
+    defaultShapes: Map<string, typeof ganttShape>;
+    defaultShape: typeof ganttShape;
     constructor();
     redraw(state: GanttCellState): void;
     redrawShape(state: GanttCellState): void;
     initializeShape(state: GanttCellState): void;
     doRedrawShape(state: GanttCellState): void;
-    createShape(state: GanttCellState): GanttShape;
-    registerShape(key: string, shape: any): void;
+    createShape(state: GanttCellState): ganttShape;
+    registerShape(key: string, shape: typeof ganttShape): void;
+    getShapeConstructor(state: GanttCellState): typeof ganttShape;
+    getShape(name: string): typeof ganttShape | null | undefined;
 }

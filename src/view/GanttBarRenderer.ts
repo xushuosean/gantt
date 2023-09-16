@@ -1,13 +1,13 @@
 import { GanttCellState } from "./GanttCellState";
-import GanttShape from '../shape/ganttShape';
 import { GanttGeometry } from "../model/GanttGeometry";
+import ganttShape from "../shape/ganttShape";
 
 export default class GanttBarRenderer {
-  defaultConfigShapes: {};
 
-  defaultShape: any = {};
+  defaultShapes: Map<string, typeof ganttShape> = new Map();
+
+  defaultShape = ganttShape;
   constructor() {
-    this.defaultConfigShapes = {};
   }
 
   redraw(state: GanttCellState) {
@@ -25,6 +25,8 @@ export default class GanttBarRenderer {
 
       this.initializeShape(state);
 
+      state.shape.apply(state)
+
       state.shape.bounds = new GanttGeometry(state.x, state.y, state.width, state.height);
       this.doRedrawShape(state);
     }
@@ -38,11 +40,24 @@ export default class GanttBarRenderer {
     state.shape?.redraw()
   }
 
-  createShape(state: GanttCellState): GanttShape {
-    return new GanttShape();
+  createShape(state: GanttCellState): ganttShape {
+    const ctor = this.getShapeConstructor(state);
+    return new ctor()
   }
 
-  registerShape(key: string, shape: any) {
+  registerShape(key: string, shape: typeof ganttShape) {
+    this.defaultShapes.set(key, shape)
+  }
 
+  getShapeConstructor(state: GanttCellState) {
+    const ctor = this.getShape('')
+    if (!ctor) {
+      return this.defaultShape
+    }
+    return ctor;
+  }
+
+  getShape(name: string) {
+    return name ? this.defaultShapes.get(name) : null
   }
 }

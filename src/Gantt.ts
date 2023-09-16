@@ -1,4 +1,4 @@
-import { GanttTasks } from './GanttTasks';
+import { CodeToGantt } from './CodeToGantt';
 import { GanttGeometry } from './model/GanttGeometry';
 import { QUnitType } from "dayjs";
 import GanttEventSource from './utils/GanttEventSource';
@@ -83,7 +83,7 @@ export default class Gantt extends GanttEventSource implements IDisposable {
 
   ganttHandler: GanttHandler;
 
-  ganttTasks: GanttTasks;
+  codeToGantt: CodeToGantt;
 
   constructor(container: HTMLElement, tasks: GanttTask[], options: GanttOptions) {
     super();
@@ -103,7 +103,7 @@ export default class Gantt extends GanttEventSource implements IDisposable {
       this.view.validate();
     })
 
-    this.ganttTasks = new GanttTasks(this, this.tasks, this.options)
+    this.codeToGantt = new CodeToGantt(this, this.tasks, this.options)
 
     if (container) {
       this.init(container)
@@ -132,7 +132,7 @@ export default class Gantt extends GanttEventSource implements IDisposable {
   }
 
   autoCreateCell() {
-    this.ganttTasks.datas.forEach(item => {
+    this.codeToGantt.datas.forEach(item => {
       this.insertBar(item.id, item.value, item.x, item.y, item.width, item.height)
     })
   }
@@ -303,15 +303,15 @@ export default class Gantt extends GanttEventSource implements IDisposable {
   // }
 
   get ganttStart() {
-    return this.ganttTasks.ganttStart;
+    return this.codeToGantt.ganttStart;
   }
 
   get ganttEnd() {
-    return this.ganttTasks.ganttEnd;
+    return this.codeToGantt.ganttEnd;
   }
 
   get diffMonth() {
-    return this.ganttTasks.diffMonth;
+    return this.codeToGantt.diffMonth;
   }
 
   /** row 高度 */

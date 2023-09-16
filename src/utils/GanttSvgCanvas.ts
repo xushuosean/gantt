@@ -3,12 +3,29 @@ export default class GanttSvgCanvas {
     this.root = root
   }
 
-  rect(x: number, y: number, width: number, height: number) {
+  rect(x: number, y: number, width: number, height: number, rx?: number, paddingVertical?: number, paddingHorizontal?: number) {
     const n = this.createElement('rect');
+
+    if (paddingVertical) {
+      height -= paddingVertical;
+      y += paddingVertical / 2;
+    }
+
+    if (paddingHorizontal) {
+      width -= paddingHorizontal;
+      x += paddingHorizontal / 2;
+    }
+
     n.setAttribute('x', `${x}`);
     n.setAttribute('y', `${y}`);
     n.setAttribute('width', `${width}`);
     n.setAttribute('height', `${height}`);
+
+    if (rx) {
+      n.setAttribute('rx', `${rx}`)
+    }
+
+
 
     this.node = n;
   }

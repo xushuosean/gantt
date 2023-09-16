@@ -1,4 +1,4 @@
-import { GanttTasks } from './GanttTasks';
+import { CodeToGantt } from './CodeToGantt';
 import { GanttGeometry } from './model/GanttGeometry';
 import GanttEventSource from './utils/GanttEventSource';
 import GanttBarHandler from './handler/GanttBarHandler';
@@ -49,7 +49,7 @@ export default class Gantt extends GanttEventSource implements IDisposable {
     view: GanttView;
     model: GanttModel;
     ganttHandler: GanttHandler;
-    ganttTasks: GanttTasks;
+    codeToGantt: CodeToGantt;
     constructor(container: HTMLElement, tasks: GanttTask[], options: GanttOptions);
     sizeDidChange(): void;
     insertBar(id: string, value: any, x: number, y: number, width: number, height: number): void;
