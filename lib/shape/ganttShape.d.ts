@@ -1,4 +1,4 @@
-import GanttSvgCanvas from "../utils/GanttSvgCanvas";
+import GanttSvgCanvas from "../util/GanttSvgCanvas";
 import { GanttCellState } from "../view/GanttCellState";
 export default class ganttShape {
     constructor();

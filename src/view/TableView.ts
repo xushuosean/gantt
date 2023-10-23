@@ -1,7 +1,7 @@
 import { Dayjs } from "dayjs";
 import Gantt, { ViewMode } from "../Gantt";
-import { createSVG } from "../utils";
-import GanttEventSource from "../utils/GanttEventSource";
+import { createSVG } from "../util";
+import GanttEventSource from "../util/GanttEventSource";
 import { GanttGeometry } from "../model/GanttGeometry";
 
 export class TableView extends GanttEventSource {

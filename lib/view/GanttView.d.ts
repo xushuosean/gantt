@@ -1,5 +1,5 @@
 import { GanttCellState } from './GanttCellState';
-import GanttEventSource from '../utils/GanttEventSource';
+import GanttEventSource from '../util/GanttEventSource';
 import Gantt from '../Gantt';
 import GanttCell from '../model/GanttCell';
 import { GanttGeometry } from '../model/GanttGeometry';

@@ -1,7 +1,7 @@
-import { GanttUndoableEdit } from './../utils/GanttUndoableEidt';
-import GanttEventSource from "../utils/GanttEventSource";
+import { GanttUndoableEdit } from '../util/GanttUndoableEidt';
+import GanttEventSource from "../util/GanttEventSource";
 import GanttCell from "./GanttCell";
-import GanttEvent from '../utils/GanttEvent';
+import GanttEvent from '../util/GanttEvent';
 
 export class GanttChildChange {
   model: GanttModel;

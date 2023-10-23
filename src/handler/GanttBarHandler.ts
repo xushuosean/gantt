@@ -1,6 +1,6 @@
 import Gantt from '../Gantt'
-import GanttEventSource from '../utils/GanttEventSource';
-import GanttEvent from '../utils/GanttEvent';
+import GanttEventSource from '../util/GanttEventSource';
+import GanttEvent from '../util/GanttEvent';
 
 export default class GanttBarHandler extends GanttEventSource {
   gantt: Gantt;

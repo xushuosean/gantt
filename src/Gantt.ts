@@ -1,7 +1,7 @@
 import { CodeToGantt } from './CodeToGantt';
 import { GanttGeometry } from './model/GanttGeometry';
 import { QUnitType } from "dayjs";
-import GanttEventSource from './utils/GanttEventSource';
+import GanttEventSource from './util/GanttEventSource';
 
 import GanttBarHandler from './handler/GanttBarHandler'
 import GanttPopupHandler from './handler/GanttPopupHandler';
@@ -11,7 +11,7 @@ import GanttBarRenderer from './view/GanttBarRenderer';
 import GanttHandler from './handler/GanttHandler';
 
 import './gantt.css'
-import GanttEvent from "./utils/GanttEvent";
+import GanttEvent from "./util/GanttEvent";
 
 import GanttView from './view/GanttView';
 

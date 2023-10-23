@@ -1,5 +1,5 @@
 import Gantt, { ViewMode } from "../Gantt";
-import GanttEventSource from "../utils/GanttEventSource";
+import GanttEventSource from "../util/GanttEventSource";
 export declare class TableView extends GanttEventSource {
     gantt: Gantt;
     mode: ViewMode;

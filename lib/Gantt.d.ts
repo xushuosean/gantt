@@ -1,6 +1,6 @@
 import { CodeToGantt } from './CodeToGantt';
 import { GanttGeometry } from './model/GanttGeometry';
-import GanttEventSource from './utils/GanttEventSource';
+import GanttEventSource from './util/GanttEventSource';
 import GanttBarHandler from './handler/GanttBarHandler';
 import GanttPopupHandler from './handler/GanttPopupHandler';
 import GanttBarRenderer from './view/GanttBarRenderer';

@@ -1,8 +1,8 @@
 import { GanttCellState } from './GanttCellState';
 import { TableView } from './TableView';
-import GanttEventSource from '../utils/GanttEventSource'
+import GanttEventSource from '../util/GanttEventSource'
 import Gantt from '../Gantt';
-import GanttEvent from '../utils/GanttEvent';
+import GanttEvent from '../util/GanttEvent';
 import GanttCell from '../model/GanttCell';
 import { GanttGeometry } from '../model/GanttGeometry';
 

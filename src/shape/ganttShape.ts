@@ -1,5 +1,5 @@
-import { createSVG } from "../utils";
-import GanttSvgCanvas from "../utils/GanttSvgCanvas";
+import { createSVG } from "../util";
+import GanttSvgCanvas from "../util/GanttSvgCanvas";
 import { GanttCellState } from "../view/GanttCellState";
 
 export default class ganttShape {
