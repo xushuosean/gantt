@@ -1,12 +1,15 @@
 import { GanttCellState } from "./GanttCellState";
 import { GanttGeometry } from "../model/GanttGeometry";
 import ganttShape from "../shape/ganttShape";
+import GanttEvent from "../util/GanttEvent";
+import { GanttMouseEvent } from "../util/GanttMouseEvent";
+import GanttRectangleShape from '../shape/GanttRectangleShape';
 
 export default class GanttBarRenderer {
 
   defaultShapes: Map<string, typeof ganttShape> = new Map();
 
-  defaultShape = ganttShape;
+  defaultShape = GanttRectangleShape;
   constructor() {
   }
 
@@ -24,6 +27,7 @@ export default class GanttBarRenderer {
       state.shape = this.createShape(state);
 
       this.initializeShape(state);
+      this.installListeners(state);
 
       state.shape.apply(state)
 
@@ -36,13 +40,26 @@ export default class GanttBarRenderer {
     state.shape?.init(state.view.getDrawPane())
   }
 
+  installListeners(state: GanttCellState) {
+    const gantt = state.view.gantt;
+    state.shape?.node.addEventListener(GanttEvent.MOUSEDOWN, (evt) => {
+      gantt.fireMouseEvent(GanttEvent.MOUSEDOWN, new GanttMouseEvent(evt, state));
+    })
+    state.shape?.node.addEventListener(GanttEvent.MOUSEMOVE, (evt) => {
+      gantt.fireMouseEvent(GanttEvent.MOUSEMOVE, new GanttMouseEvent(evt, state));
+    })
+    state.shape?.node.addEventListener(GanttEvent.MOUSEUP, (evt) => {
+      gantt.fireMouseEvent(GanttEvent.MOUSEUP, new GanttMouseEvent(evt, state));
+    })
+  }
+
   doRedrawShape(state: GanttCellState) {
     state.shape?.redraw()
   }
 
   createShape(state: GanttCellState): ganttShape {
     const ctor = this.getShapeConstructor(state);
-    return new ctor()
+    return new ctor(state.cell.geometry, '#ccc')
   }
 
   registerShape(key: string, shape: typeof ganttShape) {

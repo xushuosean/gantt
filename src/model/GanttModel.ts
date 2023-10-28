@@ -2,6 +2,8 @@ import { GanttUndoableEdit } from '../util/GanttUndoableEidt';
 import GanttEventSource from "../util/GanttEventSource";
 import GanttCell from "./GanttCell";
 import GanttEvent from '../util/GanttEvent';
+import GanttEventObject from '../util/GanttEventObject';
+import { GanttGeometry } from './GanttGeometry';
 
 export class GanttChildChange {
   model: GanttModel;
@@ -18,6 +20,28 @@ export class GanttChildChange {
   execute() {
 
   }
+}
+
+export class mxGeometryChange {
+  constructor(model: GanttModel, cell: GanttCell, geometry: GanttGeometry) {
+    this.model = model;
+    this.cell = cell;
+    this.geometry = geometry;
+    this.previous = geometry;
+  }
+
+  execute() {
+    if (this.cell != null) {
+      this.geometry = this.previous;
+      this.previous = this.model.geometryForCellChanged(
+        this.cell, this.previous)!;
+    }
+  };
+
+  model: GanttModel;
+  cell: GanttCell;
+  geometry: GanttGeometry;
+  previous: GanttGeometry
 }
 
 export default class GanttModel extends GanttEventSource {
@@ -46,7 +70,8 @@ export default class GanttModel extends GanttEventSource {
     const edit = new GanttUndoableEdit(this);
 
     edit.notify = function () {
-      edit.source.fireEvent(GanttEvent.CHANGE, edit.changes)
+      const evt = new GanttEventObject(GanttEvent.CHANGE, 'edit', edit, 'chagnes', edit.changes)
+      edit.source.fireEvent(evt)
     }
 
     return edit;
@@ -78,6 +103,19 @@ export default class GanttModel extends GanttEventSource {
   getGeometry(cell: GanttCell) {
     return cell ? cell.getGeometry() : null;
   }
+
+  setGeometry(cell: GanttCell, geometry: GanttGeometry) {
+    this.execute(new mxGeometryChange(this, cell, geometry));
+
+    return geometry;
+  }
+
+  geometryForCellChanged(cell: GanttCell, geometry: GanttGeometry) {
+    var previous = this.getGeometry(cell);
+    cell.setGeometry(geometry);
+
+    return previous;
+  };
 
   private updateLevel: number = 0;
   private endingUpdate: boolean = false;

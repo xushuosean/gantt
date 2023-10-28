@@ -1,3 +1,5 @@
+import { GanttSelectionCellsHandler } from './handler/GanttSelectionCellsHandler';
+import { GanttSelectionModel } from './model/GanttSelectionModel';
 import { CodeToGantt } from './CodeToGantt';
 import { GanttGeometry } from './model/GanttGeometry';
 import { QUnitType } from "dayjs";
@@ -13,11 +15,16 @@ import GanttHandler from './handler/GanttHandler';
 import './gantt.css'
 import GanttEvent from "./util/GanttEvent";
 
+import { contains, convertPoint } from './util/utils'
+
 import GanttView from './view/GanttView';
 
-import GanttModel, { GanttChildChange } from './model/GanttModel';
+import GanttModel, { GanttChildChange, mxGeometryChange } from './model/GanttModel';
 import GanttCell from './model/GanttCell';
 import dayjs = require('dayjs');
+import { GanttMouseEvent } from './util/GanttMouseEvent';
+import { GanttCellState } from './view/GanttCellState';
+import GanttEventObject from './util/GanttEventObject';
 
 const formatter = "YYYY-MM"
 
@@ -85,6 +92,10 @@ export default class Gantt extends GanttEventSource implements IDisposable {
 
   codeToGantt: CodeToGantt;
 
+  selectionModel: GanttSelectionModel;
+
+  selectionBarHandler: GanttSelectionCellsHandler;
+
   constructor(container: HTMLElement, tasks: GanttTask[], options: GanttOptions) {
     super();
     this.tasks = tasks;
@@ -92,18 +103,20 @@ export default class Gantt extends GanttEventSource implements IDisposable {
     this.container = container;
     this.setupOptions();
     this.barRenderer = this.createBarRenderer()
-    this.createHandlers();
     this.model = new GanttModel();
+    this.selectionModel = new GanttSelectionModel(this)
 
     this.view = this.createGanttView();
 
-    this.model.addListener(GanttEvent.CHANGE, (changes: any) => {
-      changes.forEach(this.processChange.bind(this))
+    this.model.addListener(GanttEvent.CHANGE, (evt: GanttEventObject) => {
+      evt.getProperty('edit').changes.forEach(this.processChange.bind(this))
 
       this.view.validate();
     })
 
     this.codeToGantt = new CodeToGantt(this, this.tasks, this.options)
+
+    this.createHandlers()
 
     if (container) {
       this.init(container)
@@ -112,6 +125,14 @@ export default class Gantt extends GanttEventSource implements IDisposable {
     this.sizeDidChange();
 
     this.autoCreateCell();
+  }
+
+  setSelectionCell(cell: GanttCell) {
+    this.selectionModel.setCell(cell)
+  }
+
+  setSelectionCells(cells: GanttCell[]) {
+    this.selectionModel.setCells(cells)
   }
 
   sizeDidChange() {
@@ -140,6 +161,8 @@ export default class Gantt extends GanttEventSource implements IDisposable {
   processChange(change: any) {
     if (change instanceof GanttChildChange) {
       this.view.invalidate(change.cell)
+    } else if (change instanceof mxGeometryChange) {
+      this.view.invalidate(change.cell)
     }
   }
 
@@ -167,26 +190,86 @@ export default class Gantt extends GanttEventSource implements IDisposable {
     this.mouseListeners.push(listener);
   }
 
-  fireMouseEvent(eventName: string, ...args: any[]) {
+  intersects(state: GanttCellState, x: number, y: number): boolean {
+    return contains(state.cell.geometry, x, y)
+  }
+
+  getCellAt(x: number, y: number) {
+    const { cells } = this.model;
+
+    for (let i = 0; i < cells.length; i++) {
+      const cell = cells[i]
+      const state = this.view.getState(cell);
+
+      if (state && this.intersects(state, x, y)) {
+        return cell
+      }
+    }
+  }
+
+  isMouseDown: boolean = false;
+
+  updateMouseDown(me: GanttMouseEvent, eventName: string) {
+    if (eventName === GanttEvent.MOUSEUP && this.isMouseDown) {
+      this.isMouseDown = false;
+    } else if (eventName === GanttEvent.MOUSEDOWN && !this.isMouseDown) {
+      this.isMouseDown = true;
+    }
+  }
+
+  fireMouseEvent(eventName: string, me: GanttMouseEvent) {
+
+    const pt = convertPoint(this.container, me.getX(), me.getY());
+
+    me.graphX = pt.x;
+    me.graphY = pt.y;
+
+    if (this.isMouseDown && eventName === GanttEvent.MOUSEMOVE) {
+      const cell = this.getCellAt(me.graphX, me.graphY);
+      if (cell) {
+        me.state = this.view.getState(cell)
+      }
+    }
+
+    this.updateMouseDown(me, eventName);
+
     for (let i = 0; i < this.mouseListeners.length; i++) {
       const l = this.mouseListeners[i];
 
       if (eventName === GanttEvent.MOUSEDOWN) {
-        l.mouseDown.apply(this, args);
+        l.mouseDown.apply(l, [me]);
       } else if (eventName === GanttEvent.MOUSEMOVE) {
-        l.mouseMove.apply(this, args);
+        l.mouseMove.apply(l, [me]);
       } else if (eventName === GanttEvent.MOUSEUP) {
-        l.mouseUp.apply(this, args);
+        console.log(l, 'mouseup')
+        l.mouseUp.apply(l, [me]);
       }
     }
 
     if (eventName === GanttEvent.MOUSEUP) {
-      this.click()
+      this.click(me)
     }
   }
 
-  click() {
-    console.log('here run click')
+  click(me: GanttMouseEvent) {
+    const evt = me.getEvent();
+    const cell = me.state?.cell;
+
+    // todo: fire click event
+
+    console.log(me.isComsumed())
+
+    if (!me.isComsumed()) {
+      if (cell) {
+        this.setSelectionCell(cell);
+      } else {
+        this.clearSelection();
+      }
+    }
+  }
+
+  clearSelection() {
+    this.selectionModel.clear();
   }
 
   getCellGeometry(cell: GanttCell) {
@@ -202,68 +285,69 @@ export default class Gantt extends GanttEventSource implements IDisposable {
   }
 
   createHandlers() {
-    this.createBarHandler();
-    this.createPopupHandler();
+    this.selectionBarHandler = this.createSelectionBarHandler();
     this.ganttHandler = this.createGanttHandler();
+    this.createPopupHandler();
   }
 
   createGanttHandler() {
     return new GanttHandler(this);
   }
 
-  createBarHandler() {
-    return new GanttBarHandler(this);
+  createBarHandler(state: GanttCellState) {
+    return new GanttBarHandler(state);
+  }
+
+  createSelectionBarHandler() {
+    return new GanttSelectionCellsHandler(this)
   }
 
   createPopupHandler() {
     return new GanttPopupHandler(this);
   }
 
-  // render() {
-  //   this.redrawBar();
-  // }
+  resizeCell(cell: GanttCell, bounds: GanttGeometry) {
+    this.resizeCells([cell], [bounds])
+  }
 
-  // redrawBar() {
-  //   this.tasks.forEach((task, index) => {
-  //     const barWrapper = this.createGElement();
-  //     barWrapper.classList.add('barWrapper')
-  //     this.barPanel.appendChild(barWrapper);
+  resizeCells(cells: GanttCell[], bounds: GanttGeometry[]) {
+    this.model.beginUpdate();
+    try {
+      this.cellsResized(cells, bounds)
+    } finally {
+      this.model.endUpdate();
+    }
+  }
 
-  //     this.redrawBarWrapper(barWrapper, task, index);
-  //   })
+  cellsResized(cells: GanttCell[], bounds: GanttGeometry[]) {
+    this.model.beginUpdate();
+    try {
+      cells.forEach((cell, index) => {
+        this.cellResized(cell, bounds[index])
+      })
+    } finally {
+      this.model.endUpdate();
+    }
+  }
 
-  // }
+  cellResized(cell: GanttCell, bounds: GanttGeometry) {
+    const prev = this.getCellGeometry(cell);
 
-  // redrawBarWrapper(parent: SVGGElement, task: GanttTask, index: number) {
-  //   const barGroup = this.createGElement();
-  //   barGroup.classList.add('barGroup')
-  //   parent.appendChild(barGroup)
+    const geo = prev?.clone()!;
 
-  //   this.redrawBarGroup(barGroup, task, index);
-  // }
+    geo.x = bounds.x;
+    geo.y = bounds.y
 
-  // redrawBarGroup(parent: SVGGElement, task: GanttTask, index: number) {
-  //   const paddingLeft = dayjs(task.start).diff(this.ganttStart, viewModeMapDayjsUnit[this.options.viewMode] as QUnitType)
-  //   const steps = this.getSplitNumber(task);
-  //   createSVG('rect', {
-  //     x: paddingLeft * this.getRenderColumnWidth(),
-  //     y: this.headerHeight + this.rowHeight * index + this.options.padding / 2,
-  //     height: this.options.barHeight,
-  //     width: this.getRenderColumnWidth() * steps,
-  //     rx: '3',
-  //     ry: '3',
-  //     class: 'bar',
-  //     append_to: parent
-  //   })
+    geo.width = bounds.width;
+    geo.height = bounds.height;
 
-  //   createSVG('text', {
-  //     x: paddingLeft * this.getRenderColumnWidth() + this.getRenderColumnWidth() * steps / 2,
-  //     y: this.headerHeight + this.rowHeight * index + this.options.padding / 2 + this.options.barHeight / 2,
-  //     class: 'barText',
-  //     innerHTML: task.name,
-  //     append_to: parent
-  //   })
-  // }
+    this.model.beginUpdate();
+    try {
+      this.model.setGeometry(cell, geo)
+    } finally {
+      this.model.endUpdate();
+    }
+  }
 
   getSplitNumber(task: GanttTask) {
     return dayjs(task.end).diff(dayjs(task.start), viewModeMapDayjsUnit[this.options.viewMode] as QUnitType) + 1
@@ -275,7 +359,7 @@ export default class Gantt extends GanttEventSource implements IDisposable {
 
   setupOptions() {
     const defaultOptions: GanttOptions = {
-      headerHeight: 50,
+      headerHeight: 80,
       columnWidth: 30,
       step: 24,
       viewMode: ViewMode.DAY,

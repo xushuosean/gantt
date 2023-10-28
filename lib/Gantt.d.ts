@@ -1,3 +1,5 @@
+import { GanttSelectionCellsHandler } from './handler/GanttSelectionCellsHandler';
+import { GanttSelectionModel } from './model/GanttSelectionModel';
 import { CodeToGantt } from './CodeToGantt';
 import { GanttGeometry } from './model/GanttGeometry';
 import GanttEventSource from './util/GanttEventSource';
@@ -10,6 +12,8 @@ import GanttView from './view/GanttView';
 import GanttModel from './model/GanttModel';
 import GanttCell from './model/GanttCell';
 import dayjs = require('dayjs');
+import { GanttMouseEvent } from './util/GanttMouseEvent';
+import { GanttCellState } from './view/GanttCellState';
 export interface IDisposable {
     dispose(): void;
 }
@@ -50,7 +54,11 @@ export default class Gantt extends GanttEventSource implements IDisposable {
     model: GanttModel;
     ganttHandler: GanttHandler;
     codeToGantt: CodeToGantt;
+    selectionModel: GanttSelectionModel;
+    selectionBarHandler: GanttSelectionCellsHandler;
     constructor(container: HTMLElement, tasks: GanttTask[], options: GanttOptions);
+    setSelectionCell(cell: GanttCell): void;
+    setSelectionCells(cells: GanttCell[]): void;
     sizeDidChange(): void;
     insertBar(id: string, value: any, x: number, y: number, width: number, height: number): void;
     autoCreateCell(): void;
@@ -61,15 +69,25 @@ export default class Gantt extends GanttEventSource implements IDisposable {
     addCells(cells: GanttCell[]): void;
     mouseListeners: any[];
     addMouseListener(listener: any): void;
-    fireMouseEvent(eventName: string, ...args: any[]): void;
-    click(): void;
+    intersects(state: GanttCellState, x: number, y: number): boolean;
+    getCellAt(x: number, y: number): GanttCell | undefined;
+    isMouseDown: boolean;
+    updateMouseDown(me: GanttMouseEvent, eventName: string): void;
+    fireMouseEvent(eventName: string, me: GanttMouseEvent): void;
+    click(me: GanttMouseEvent): void;
+    clearSelection(): void;
     getCellGeometry(cell: GanttCell): GanttGeometry | null;
     addBar(): void;
     createBarRenderer(): GanttBarRenderer;
     createHandlers(): void;
     createGanttHandler(): GanttHandler;
-    createBarHandler(): GanttBarHandler;
+    createBarHandler(state: GanttCellState): GanttBarHandler;
+    createSelectionBarHandler(): GanttSelectionCellsHandler;
     createPopupHandler(): GanttPopupHandler;
+    resizeCell(cell: GanttCell, bounds: GanttGeometry): void;
+    resizeCells(cells: GanttCell[], bounds: GanttGeometry[]): void;
+    cellsResized(cells: GanttCell[], bounds: GanttGeometry[]): void;
+    cellResized(cell: GanttCell, bounds: GanttGeometry): void;
     getSplitNumber(task: GanttTask): number;
     createGElement(): SVGGElement;
     setupOptions(): void;

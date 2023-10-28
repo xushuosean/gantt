@@ -6,6 +6,10 @@ export class GanttGeometry {
     this.height = height;
   }
 
+  clone() {
+    return new GanttGeometry(this.x, this.y, this.width, this.height);
+  }
+
   x: number;
   y: number;
   width: number;

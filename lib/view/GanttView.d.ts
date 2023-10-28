@@ -6,8 +6,10 @@ import { GanttGeometry } from '../model/GanttGeometry';
 export default class GanttView extends GanttEventSource {
     constructor(gantt: Gantt);
     init(): void;
+    private isContainerEvent;
     private installListener;
     private createGElement;
+    private tableView;
     createSvg(): void;
     getState(cell: GanttCell): GanttCellState | null;
     createState(cell: GanttCell): GanttCellState;
@@ -15,9 +17,11 @@ export default class GanttView extends GanttEventSource {
     validate(): void;
     private updateCellState;
     getDrawPane(): SVGGElement;
+    getOverlayPane(): SVGGElement;
     gantt: Gantt;
     states: Map<GanttCell, GanttCellState>;
     ganttBounds: GanttGeometry;
     private canvas;
     private drawPane;
+    private overlayPane;
 }

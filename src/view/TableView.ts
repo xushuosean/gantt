@@ -11,10 +11,10 @@ export class TableView extends GanttEventSource {
   columnWidth: number;
   headerHeight: number;
 
-  private container: SVGGElement;
-  private tableHeaderPanel: SVGGElement;
-  private tableBodyPanel: SVGGElement;
-  private tableBorderPanel: SVGGElement;
+  container: SVGGElement;
+  tableHeaderPanel: SVGGElement;
+  tableBodyPanel: SVGGElement;
+  tableBorderPanel: SVGGElement;
 
   constructor(
     gantt: Gantt,
@@ -78,13 +78,20 @@ export class TableView extends GanttEventSource {
     })
 
     for (let i = 0; i <= this.columnNum; i++) {
-      console.log(this.gantt.ganttStart.month())
       const curDate = this.gantt.ganttStart.add(i, 'month');
+      const curYear = curDate.year();
       const curMonth = curDate.month() + 1;
-      console.log(curMonth)
+      if (curMonth === 6) {
+        createSVG('text', {
+          x: i * this.getRenderColumnWidth() + this.getRenderColumnWidth() / 2,
+          y: 30,
+          innerHTML: curYear,
+          append_to: this.tableHeaderPanel
+        })
+      }
       createSVG('text', {
         x: i * this.getRenderColumnWidth(),
-        y: 30,
+        y: 50,
         innerHTML: curMonth,
         append_to: this.tableHeaderPanel
       })

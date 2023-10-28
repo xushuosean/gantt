@@ -1,3 +1,4 @@
+import { GanttMouseEvent } from './../util/GanttMouseEvent';
 import { GanttCellState } from './GanttCellState';
 import { TableView } from './TableView';
 import GanttEventSource from '../util/GanttEventSource'
@@ -20,20 +21,34 @@ export default class GanttView extends GanttEventSource {
     this.createSvg();
   }
 
+  private isContainerEvent(evt: MouseEvent) {
+    const source = evt.srcElement ? evt.srcElement : evt.target;
+
+    const containerElement = [
+      this.gantt.container,
+    ]
+
+    const sourceParnet = source.parentNode;
+    return containerElement.some(element => element === source) || [this.tableView.tableBodyPanel].some(ele => ele === sourceParnet)
+  }
+
   private installListener() {
     const container = this.gantt.container;
     const gantt = this.gantt;
 
     container.addEventListener(GanttEvent.MOUSEDOWN, (evt) => {
-      gantt.fireMouseEvent(GanttEvent.MOUSEDOWN,)
+      if (this.isContainerEvent(evt))
+        gantt.fireMouseEvent(GanttEvent.MOUSEDOWN, new GanttMouseEvent(evt))
     })
 
     container.addEventListener(GanttEvent.MOUSEMOVE, (evt) => {
-      gantt.fireMouseEvent(GanttEvent.MOUSEMOVE,)
+      if (this.isContainerEvent(evt))
+        gantt.fireMouseEvent(GanttEvent.MOUSEMOVE, new GanttMouseEvent(evt))
     })
 
     container.addEventListener(GanttEvent.MOUSEUP, (evt) => {
-      gantt.fireMouseEvent(GanttEvent.MOUSEUP,)
+      if (this.isContainerEvent(evt))
+        gantt.fireMouseEvent(GanttEvent.MOUSEUP, new GanttMouseEvent(evt))
     })
   }
 
@@ -44,6 +59,8 @@ export default class GanttView extends GanttEventSource {
     )
   }
 
+  private tableView: TableView
+
   createSvg() {
     const { container } = this.gantt;
     const canvas = (this.canvas = document.createElementNS(
@@ -52,7 +69,7 @@ export default class GanttView extends GanttEventSource {
     ));
     canvas.classList.add('canvas')
 
-    const tableView = new TableView(
+    this.tableView = new TableView(
       this.gantt,
       this.gantt.options.viewMode,
       this.gantt.diffMonth + 1,
@@ -60,11 +77,15 @@ export default class GanttView extends GanttEventSource {
       this.gantt.options.headerHeight
     )
 
-    tableView.init(canvas)
+    this.tableView.init(canvas)
 
     this.drawPane = this.createGElement();
     this.drawPane.classList.add('drawPane');
     canvas.appendChild(this.drawPane);
+
+    this.overlayPane = this.createGElement();
+    this.overlayPane.classList.add('overlayPane');
+    canvas.appendChild(this.overlayPane);
 
     const root = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     root.style.left = '0px';
@@ -134,9 +155,14 @@ export default class GanttView extends GanttEventSource {
     return this.drawPane;
   }
 
+  getOverlayPane() {
+    return this.overlayPane;
+  }
+
   gantt: Gantt;
   states: Map<GanttCell, GanttCellState>;
   ganttBounds: GanttGeometry;
   private canvas: SVGGElement;
   private drawPane: SVGGElement;
+  private overlayPane: SVGGElement;
 }

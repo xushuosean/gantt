@@ -7,13 +7,25 @@ export default class ganttShape {
     create(container: any): SVGGElement;
     createSvg(): SVGGElement;
     redraw(): void;
-    doRedrawShape(canvas: GanttSvgCanvas, x: number, y: number, w: number, h: number): void;
+    doRedrawShape(canvas: GanttSvgCanvas): void;
+    beforePaint(canvas: GanttSvgCanvas): void;
+    paint(canvas: GanttSvgCanvas): void;
+    afterPaint(canvas: GanttSvgCanvas): void;
+    paintShape(canvas: GanttSvgCanvas, x: number, y: number, width: number, height: number): void;
+    paintBackground(canvas: GanttSvgCanvas, x: number, y: number, width: number, height: number): void;
+    paintForeground(canvas: GanttSvgCanvas, x: number, y: number, width: number, height: number): void;
+    configureCanvas(c: GanttSvgCanvas): void;
     createCanvas(): GanttSvgCanvas;
     apply(state: GanttCellState): void;
     destroy(): void;
+    setCursor(cursor?: string): void;
+    clear(): void;
     node: SVGGElement;
     bounds: any;
-    strokewidth: number;
+    stroke: string;
+    strokeWidth: number;
     opacity: number;
+    cursor: string;
+    fillColor: string;
     state: GanttCellState;
 }

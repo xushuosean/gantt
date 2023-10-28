@@ -8,13 +8,12 @@ export default class ganttShape {
   }
 
   private initStyles() {
-    this.strokewidth = 1;
+    this.strokeWidth = 1;
     this.opacity = 100;
   }
 
   init(container: SVGGElement) {
     this.node = this.create(container)
-    console
 
     if (container) {
       container.appendChild(this.node)
@@ -30,16 +29,43 @@ export default class ganttShape {
   }
 
   redraw() {
+    this.clear();
     const canvas = this.createCanvas();
 
-    this.doRedrawShape(canvas, this.bounds.x, this.bounds.y, this.bounds.width, this.bounds.height);
+    this.doRedrawShape(canvas);
 
     this.node.insertAdjacentHTML('beforeend', canvas.root.outerHTML)
   }
 
-  doRedrawShape(canvas: GanttSvgCanvas, x: number, y: number, w: number, h: number) {
-    canvas.rect(x, y, w, h, 4, 4, 20);
-    canvas.end()
+  doRedrawShape(canvas: GanttSvgCanvas) {
+    this.beforePaint(canvas);
+    this.paint(canvas);
+    this.afterPaint(canvas)
+  }
+
+  beforePaint(canvas: GanttSvgCanvas) { }
+
+  paint(canvas: GanttSvgCanvas) {
+    this.configureCanvas(canvas)
+    this.paintShape(canvas, this.bounds.x, this.bounds.y, this.bounds.width, this.bounds.height)
+  }
+
+  afterPaint(canvas: GanttSvgCanvas) { }
+
+  paintShape(canvas: GanttSvgCanvas, x: number, y: number, width: number, height: number) {
+    this.paintBackground(canvas, x, y, width, height);
+    this.paintForeground(canvas, x, y, width, height);
+  }
+
+  paintBackground(canvas: GanttSvgCanvas, x: number, y: number, width: number, height: number) { }
+
+  paintForeground(canvas: GanttSvgCanvas, x: number, y: number, width: number, height: number) { }
+
+  configureCanvas(c: GanttSvgCanvas) {
+    c.setFillColor(this.fillColor)
+    c.setAlpha(this.opacity / 100)
+    c.setDashed(true, true)
+    c.setStrokeColor(this.stroke)
   }
 
   createCanvas() {
@@ -51,13 +77,46 @@ export default class ganttShape {
   }
 
   destroy() {
+    if (this.node.parentNode != null) {
+      this.node.parentNode.removeChild(this.node);
+    }
+  }
+
+  setCursor(cursor?: string) {
+    if (cursor === undefined) {
+      cursor = ''
+    }
+
+    this.cursor = cursor;
+
+    if (this.node != null) {
+      this.node.style.cursor = cursor;
+    }
+  }
+
+  clear() {
+    if (this.node.ownerSVGElement != null) {
+      while (this.node.lastChild != null) {
+        this.node.removeChild(this.node.lastChild);
+      }
+    }
+    else {
+      this.node.style.cssText = 'position:absolute;' + ((this.cursor != null) ?
+        ('cursor:' + this.cursor + ';') : '');
+      this.node.innerHTML = '';
+    }
   }
 
   node: SVGGElement;
 
   bounds: any;
-  strokewidth: number;
+  stroke: string;
+  strokeWidth: number;
   opacity: number;
+
+  cursor: string;
+
+  fillColor: string;
 
   state: GanttCellState;
 }

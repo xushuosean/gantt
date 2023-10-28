@@ -1,3 +1,5 @@
+import GanttEventObject from "./GanttEventObject";
+
 export default class GanttEventSource {
   constructor() { }
 
@@ -26,13 +28,14 @@ export default class GanttEventSource {
     }
   }
 
-  fireEvent(name: string, ...args: any[]) {
+  fireEvent(evt: GanttEventObject) {
     if (this.eventListeners != null) {
 
+      const args = [evt]
       for (var i = 0; i < this.eventListeners.length; i += 2) {
         var listen = this.eventListeners[i];
 
-        if (listen === null || listen === name) {
+        if (listen === null || listen === evt.getName()) {
           this.eventListeners[i + 1].apply(this, args);
         }
       }

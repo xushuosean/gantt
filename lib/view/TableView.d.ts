@@ -6,10 +6,10 @@ export declare class TableView extends GanttEventSource {
     columnNum: number;
     columnWidth: number;
     headerHeight: number;
-    private container;
-    private tableHeaderPanel;
-    private tableBodyPanel;
-    private tableBorderPanel;
+    container: SVGGElement;
+    tableHeaderPanel: SVGGElement;
+    tableBodyPanel: SVGGElement;
+    tableBorderPanel: SVGGElement;
     constructor(gantt: Gantt, mode: ViewMode, columnNum: number, columnWidth: number, headerHeight: number);
     init(container: SVGGElement): void;
     createSvg(): void;
