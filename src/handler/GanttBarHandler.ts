@@ -131,6 +131,35 @@ export default class GanttBarHandler {
     this.preview.init(this.gantt.view.getOverlayPane());
   }
 
+  union(bounds: GanttGeometry, dx: number, dy: number, index: number) {
+    let w0 = bounds.width;
+    let h0 = bounds.height;
+    let left = bounds.x;
+    let right = bounds.x + w0;
+
+    // left handle
+    if (index === 0) {
+      left += dx;
+      left = Math.round(left);
+    } else if (index === 1) {
+      // right handle
+      right += dx;
+      right = Math.round(right);
+    }
+
+    let width = right - left;
+
+    // Flips over left side
+    if (width < 0) {
+      left += width;
+      width = Math.abs(width);
+    }
+
+    const result = new GanttGeometry(left, bounds.y, width, h0);
+
+    return result;
+  }
+
   resizeVertex(me: GanttMouseEvent) {
     const point = new GanttPoint(me.graphX, me.graphY);
 
@@ -139,7 +168,7 @@ export default class GanttBarHandler {
 
     const geo = this.gantt.getCellGeometry(this.state.cell)!;
 
-    this.unscaledBounds = new GanttGeometry(geo?.x, geo?.y, geo?.width + dx, geo?.height + dy)
+    this.unscaledBounds = this.union(geo, dx, dy, this.index!);
 
     this.bounds = new GanttGeometry(this.unscaledBounds.x, this.unscaledBounds.y, this.unscaledBounds.width, this.unscaledBounds.height);
 
@@ -168,8 +197,8 @@ export default class GanttBarHandler {
   mouseDown(me: GanttMouseEvent) {
     if (!me.isComsumed()) {
       const handle = this.getHandleForEvent(me);
-      if (handle) {
-        this.start(me.graphX, me.graphY, GanttBarHandle.left);
+      if (handle !== null) {
+        this.start(me.graphX, me.graphY, handle);
         me.consume();
       }
     }
