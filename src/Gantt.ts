@@ -26,20 +26,18 @@ import { GanttMouseEvent } from './util/GanttMouseEvent';
 import { GanttCellState } from './view/GanttCellState';
 import GanttEventObject from './util/GanttEventObject';
 
-const formatter = "YYYY-MM"
-
 export interface IDisposable {
   dispose(): void
 }
 
 export enum ViewMode {
-  DAY = "Day",
-  WEEK = "Week",
-  MONTH = "Month",
-  YEAR = "Year"
+  DAY = "day",
+  WEEK = "week",
+  MONTH = "month",
+  YEAR = "year"
 }
 // viewModel 到 dayjs 单位的 map
-const viewModeMapDayjsUnit = {
+export const viewModeMapDayjsUnit = {
   [ViewMode.DAY]: 'day',
   [ViewMode.WEEK]: 'week',
   [ViewMode.MONTH]: 'month',
@@ -69,17 +67,7 @@ export default class Gantt extends GanttEventSource implements IDisposable {
   tasks: GanttTask[];
   options: GanttOptions;
 
-  canvas: SVGGElement;
-
-  // table
-  tablePanel: SVGGElement;
-
-  tableHeaderPanel: SVGGElement;
-  tableBodyPanel: SVGGElement;
-  tableBorderPanel: SVGGElement;
-
-  // bar
-  barPanel: SVGGElement;
+  viewMode: ViewMode;
 
   // bar renderer
   barRenderer: GanttBarRenderer;
@@ -128,7 +116,7 @@ export default class Gantt extends GanttEventSource implements IDisposable {
   }
 
   setSelectionCell(cell: GanttCell) {
-    this.selectionModel.setCell(cell)
+    this.setSelectionCells([cell]);
   }
 
   setSelectionCells(cells: GanttCell[]) {
@@ -256,9 +244,6 @@ export default class Gantt extends GanttEventSource implements IDisposable {
     const cell = me.state?.cell;
 
     // todo: fire click event
-
-    console.log(me.isComsumed())
-
     if (!me.isComsumed()) {
       if (cell) {
         this.setSelectionCell(cell);
@@ -350,7 +335,7 @@ export default class Gantt extends GanttEventSource implements IDisposable {
   }
 
   getSplitNumber(task: GanttTask) {
-    return dayjs(task.end).diff(dayjs(task.start), viewModeMapDayjsUnit[this.options.viewMode] as QUnitType) + 1
+    return dayjs(task.end).diff(dayjs(task.start), this.options.viewMode) + 1
   }
 
   createGElement() {
@@ -368,12 +353,14 @@ export default class Gantt extends GanttEventSource implements IDisposable {
     }
 
     this.options = Object.assign({}, defaultOptions, this.options)
+
+    this.viewMode = this.options.viewMode
   }
 
   getRenderColumnWidth() {
-    if (this.options.viewMode) {
-      return this.options.columnWidth * 4;
-    }
+    // if (this.viewMode) {
+    //   return this.options.columnWidth * 4;
+    // }
     return this.options.columnWidth;
   }
 

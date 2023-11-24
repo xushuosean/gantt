@@ -1,5 +1,5 @@
 import { Dayjs } from 'dayjs';
-import Gantt, { GanttOptions, GanttTask } from './Gantt'
+import Gantt, { GanttOptions, GanttTask, viewModeMapDayjsUnit } from './Gantt'
 import dayjs from 'dayjs'
 import minMax from 'dayjs/plugin/minMax';
 dayjs.extend(minMax)
@@ -48,7 +48,10 @@ export class CodeToGantt {
   }
 
   setupDate() {
-    [this.ganttStart, this.ganttEnd] = this.getMinMaxDate();
+    const [start, end] = this.getMinMaxDate();
+    this.ganttStart = start.subtract(12, 'month');
+    console.log(end)
+    this.ganttEnd = end.add(12, 'month')
   }
 
   get diffMonth() {
@@ -62,11 +65,12 @@ export class CodeToGantt {
   }
 
   doConvert(task: GanttTask, index: number): GanttCellData {
-    const paddingLeft = dayjs(task.start).month() - this.ganttStart.month()
+    const paddingLeft = dayjs(task.start).diff(this.ganttStart, 'month')
+    console.log(paddingLeft)
 
     const x = paddingLeft * this.getRenderColumnWidth();
     const y = this.headerHeight + this.rowHeight * index + this.options.padding / 2;
-    const width = this.getRenderColumnWidth() * this.getSplitNumber(task);
+    const width = this.getRenderColumnWidth() * this.getNumberOfColumns(task);
     const height = this.options.barHeight;
     return {
       id: task.id,
@@ -78,8 +82,9 @@ export class CodeToGantt {
     }
   }
 
-  getSplitNumber(task: GanttTask) {
-    return dayjs(task.end).diff(dayjs(task.start), 'month') + 1
+  /** 获取表格的列数 */
+  getNumberOfColumns(task: GanttTask) {
+    return dayjs(task.end).diff(dayjs(task.start), this.options.viewMode) + 1
   }
 
   getRenderColumnWidth() {

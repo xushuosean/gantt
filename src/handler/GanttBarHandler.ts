@@ -54,7 +54,7 @@ export default class GanttBarHandler {
   createSizer(cursor: string, i: number) {
     const size = 6;
 
-    const bounds = new GanttGeometry(0, 0, size, size);
+    const bounds = new GanttGeometry(0, 0, size, this.state.height);
     const sizer = this.createSizerShape(bounds, i);
 
     sizer.init(this.gantt.view.getOverlayPane())
@@ -67,7 +67,7 @@ export default class GanttBarHandler {
   }
 
   createSizerShape(bounds: GanttGeometry, index: number) {
-    return new BorderShape(bounds, '#00FF00', 'black')
+    return new BorderShape(bounds, '#fff', 'black')
   }
 
   getSelectionBounds(state: GanttCellState) {
@@ -80,8 +80,6 @@ export default class GanttBarHandler {
   }
 
   redraw() {
-    console.log('redraw');
-
     this.drawPreview();
 
     this.redrawHandles();
@@ -90,7 +88,6 @@ export default class GanttBarHandler {
   drawPreview() {
     if (this.preview) {
       this.preview.bounds = this.bounds;
-      console.log(this.preview.bounds)
       this.preview.redraw();
     }
     this.selectionBorder.bounds = this.bounds;
@@ -251,7 +248,6 @@ export default class GanttBarHandler {
       this.selectionBounds = this.getSelectionBounds(this.state);
       this.bounds = new GanttGeometry(this.selectionBounds.x, this.selectionBounds.y,
         this.selectionBounds.width, this.selectionBounds.height);
-      console.log('reset');
 
       this.drawPreview();
     }

@@ -71,7 +71,7 @@ export default class GanttView extends GanttEventSource {
 
     this.tableView = new TableView(
       this.gantt,
-      this.gantt.options.viewMode,
+      this.gantt.viewMode,
       this.gantt.diffMonth + 1,
       this.gantt.options.columnWidth,
       this.gantt.options.headerHeight
